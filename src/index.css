@@ -1,0 +1,75 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style: none;
+  text-decoration: none;
+  outline: none;
+}
+.container-page {
+  width: 100%;
+  padding: 0px 16px;
+}
+.container-page > div {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 9;
+  padding: 20px 0px;
+}
+
+.cheque {
+  width: 340px;
+  font-size: 16px;
+}
+.modal-print {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.print-body {
+  background-color: #fff;
+  max-height: 80dvh;
+  overflow-y: auto;
+  padding: 16px;
+}
+.title-text,
+.print-body h1 {
+  text-align: center;
+}
+.table {
+  width: 100%;
+  margin-top: 20px;
+}
+.table table {
+  width: 100%;
+
+}
+.table * {
+  text-align: center;
+  min-height: 20px;
+  color: #000;
+}
+
+.table .left {
+  text-align: left;
+}
+.table .right {
+  text-align: right;
+}
+
+.table hr {
+  min-height: auto;
+  border: 0;
+  border-top: 1px dashed #c1c1c1;
+  height: 0;
+  margin: 10px 0;
+}

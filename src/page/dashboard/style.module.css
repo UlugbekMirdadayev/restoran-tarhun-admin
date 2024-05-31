@@ -1,0 +1,20 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80dvw;
+  padding-top: 30px;
+  gap: 30px;
+  transition: 300ms cubic-bezier(0.94, 1.4, 0.61, 1.21);
+
+  &:has(a:target) {
+    padding-top: 65px;
+  }
+  .li {
+    padding: 40px;
+
+    .link {
+      color: red;
+    }
+  }
+}

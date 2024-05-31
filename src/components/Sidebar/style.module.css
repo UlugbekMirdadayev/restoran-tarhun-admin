@@ -1,0 +1,55 @@
+.navbar {
+  background-color: var(--mantine-color-body);
+  height: calc(100dvh - 130px);
+  width: 300px;
+  padding: var(--mantine-spacing-md);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--mantine-color-gray-3);
+}
+.navbarMain {
+  flex: 1;
+  margin-top: var(--mantine-spacing-xl);
+}
+.title {
+  text-transform: uppercase;
+  letter-spacing: -0.25px;
+}
+.link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-gray-7);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-sm);
+  font-weight: 500;
+  gap: 10px;
+}
+.link:hover {
+  background-color: var(--mantine-color-gray-0);
+  color: var(--mantine-color-black);
+  svg {
+    fill: var(--mantine-color-black);
+  }
+}
+
+.link[aria-current],
+.link[aria-current]:hover {
+  background-color: var(--mantine-color-blue-light);
+  color: var(--mantine-color-blue-light-color);
+}
+.link[aria-current] svg,
+.link[aria-current]:hover svg {
+  fill: var(--mantine-color-blue-light-color);
+}
+.linkIcon {
+  color: var(--mantine-color-gray-6);
+  margin-right: var(--mantine-spacing-sm);
+  width: 25px;
+  height: 25px;
+}
+.footer {
+  border-top: 1px solid var(--mantine-color-gray-3);
+  padding-top: var(--mantine-spacing-md);
+}
