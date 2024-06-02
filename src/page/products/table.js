@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Button, Flex, Image, Menu, Table, Text } from "@mantine/core";
+import {
+  Button,
+  Flex,
+  Image,
+  Menu,
+  Table,
+  Text,
+  Pagination,
+  TextInput,
+} from "@mantine/core";
 import { formatCurrencyUZS } from "../../utils/helpers";
 import ModalScreen from "../../components/modal";
 import { Eye, Trash, Reload } from "../../components/icon";
@@ -7,7 +16,29 @@ import { IMAGE_URL } from "../../utils/constants";
 
 export default function TableComponent({ data, handleDelete, setEditForm }) {
   const [image, setImage] = useState(null);
-  const rows = data?.map((element) => (
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+
+  // Pagination states
+  const [activePage, setActivePage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Calculate the data for the current page
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  // Filter data based on search query
+  const filteredData = data.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const currentData = filteredData?.slice(startIndex, endIndex);
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    setActivePage(1); // Reset pagination when searching
+  };
+
+  const rows = currentData?.map((element) => (
     <Table.Tr key={element?.id}>
       <Table.Td>{element?.name}</Table.Td>
       <Table.Td>{formatCurrencyUZS(element?.body_price)}</Table.Td>
@@ -54,9 +85,9 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
             <Menu.Label>O'chirishga rozimisiz</Menu.Label>
             <Menu.Divider />
             <Menu.Item onClick={() => handleDelete(element?.id)} color="red">
-              Ha , roziman
+              Ha, roziman
             </Menu.Item>
-            <Menu.Item>Yo'q , keyinroq</Menu.Item>
+            <Menu.Item>Yo'q, keyinroq</Menu.Item>
           </Menu.Dropdown>
         </Menu>
         <Button
@@ -72,51 +103,59 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
   ));
 
   return (
-    <Table
-      my={"lg"}
-      pt={"lg"}
-      w={"100%"}
-      striped
-      highlightOnHover
-      withTableBorder
-      withColumnBorders
-    >
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th>Maxsulot nomi</Table.Th>
-          <Table.Th>Maxsulot tan narxi</Table.Th>
-          <Table.Th>Maxsulot sotilish narxi</Table.Th>
-          <Table.Th>Maxsulot turi</Table.Th>
-          <Table.Th>Maxsulot soni</Table.Th>
-          <Table.Th>Rasmi</Table.Th>
-          <Table.Th>O'chirish</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
-        {data?.length ? (
-          rows
-        ) : (
-          <Table.Tr>
-            <Table.Th ta="center" colSpan={7}>
-              Ma'lumot yo'q
-            </Table.Th>
-          </Table.Tr>
-        )}
-      </Table.Tbody>
-      {data?.length ? (
-        <Table.Tfoot>
-          <Table.Tr
-            style={{
-              borderTop: "var(--_tr-border-bottom, none)",
-            }}
-          >
-            <Table.Th colSpan={7} ta="center">
-              Jami: {data?.length}
-              ta maxsulot mavjud.
-            </Table.Th>
-          </Table.Tr>
-        </Table.Tfoot>
-      ) : null}
-    </Table>
+    <>
+      {/* Search input field */}
+      <TextInput
+        placeholder="Search..."
+        value={searchQuery}
+        onChange={handleSearch}
+        style={{ marginBottom: 16 }}
+      />
+      {/* Your table component */}
+      <Table
+        my={"lg"}
+        pt={"lg"}
+        w={"100%"}
+        striped
+        highlightOnHover
+        withTableBorder
+        withColumnBorders
+      >
+        {/* Your table header */}
+        <Table.Thead>{/* Your table header rows */}</Table.Thead>
+        <Table.Tbody>
+          {currentData?.length ? (
+            rows
+          ) : (
+            <Table.Tr>
+              <Table.Th ta="center" colSpan={7}>
+                Ma'lumot yo'q
+              </Table.Th>
+            </Table.Tr>
+          )}
+        </Table.Tbody>
+        {currentData?.length ? (
+          <Table.Tfoot>
+            <Table.Tr
+              style={{
+                borderTop: "var(--_tr-border-bottom, none)",
+              }}
+            >
+              <Table.Th colSpan={7} ta="center">
+                Jami: {filteredData?.length} ta maxsulot mavjud.
+              </Table.Th>
+            </Table.Tr>
+          </Table.Tfoot>
+        ) : null}
+      </Table>
+      <Flex justify="center" mt="lg">
+        {/* Pagination component */}
+        <Pagination
+          page={activePage}
+          onChange={setActivePage}
+          total={Math.ceil(filteredData?.length / itemsPerPage)}
+        />
+      </Flex>
+    </>
   );
 }

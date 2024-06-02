@@ -85,7 +85,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
       return editForm[key] !== values[key] && key !== "photo";
     });
 
-    if (!editedInputs.length)
+    if (!editedInputs?.length)
       return toast.info("O'zgartirishlar kiritilmadi !");
     if (editForm?.id) {
       formData.append("product_id", editForm.id);

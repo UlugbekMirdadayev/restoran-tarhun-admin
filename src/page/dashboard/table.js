@@ -1,14 +1,10 @@
-import React, { useRef, useState } from "react"; //  useRef,
-import { Button, Table } from "@mantine/core";
+import React, { useRef, useState } from "react";
+import { Button, Table, Pagination, Flex } from "@mantine/core";
 import moment from "moment";
 import { formatCurrencyUZS } from "../../utils/helpers";
 import { Eye } from "../../components/icon";
 import { getRequest } from "../../services/api";
-// import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
-// import { useReactToPrint } from "react-to-print";
-// import { getRequest } from "../../services/api";
-// import { toast } from "react-toastify";
 
 export default function TableComponent({ data, user }) {
   const TableCheck = ({ data }) => {
@@ -33,17 +29,16 @@ export default function TableComponent({ data, user }) {
           toast.error("Xatolik yuz berdi");
         });
     };
-    // useReactToPrint({
-    //   content: () => componentRef.current,
-    //   onAfterPrint: () => setOpen(false),
-    //   onBeforePrint: () => setOpen(true),
-    // });
+
     const getById = () => {
       setLoading(true);
       getRequest(`order/detail/${data?.id}`, user?.token)
         .then(({ data }) => {
           setLoading(false);
-          setOrder(data?.result?.order);
+          setOrder({
+            ...data?.result?.order,
+            count_client: data?.result?.count_client,
+          });
           setProducts(data?.result?.products);
           setOpen(true);
         })
@@ -53,6 +48,7 @@ export default function TableComponent({ data, user }) {
           toast.error("Xatolik yuz berdi");
         });
     };
+
     return (
       <>
         <Button
@@ -112,6 +108,14 @@ export default function TableComponent({ data, user }) {
                       </tr>
                       <tr>
                         <td className="left" colSpan={2}>
+                          Mijozlar soni: {order?.count_client}
+                        </td>
+                        <td className="right">
+                          {formatCurrencyUZS(order?.count_client * 3000)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="left" colSpan={2}>
                           Umumiy summa
                         </td>
                         <td className="right">
@@ -136,7 +140,15 @@ export default function TableComponent({ data, user }) {
       </>
     );
   };
-  const rows = data?.orders?.map((element) => (
+
+  const [activePage, setActivePage] = useState(1);
+  const itemsPerPage = 10;
+
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = data?.orders?.slice(startIndex, endIndex);
+
+  const rows = currentData?.map((element) => (
     <Table.Tr key={element?.id}>
       <Table.Td>{element?.room_name}</Table.Td>
       <Table.Td>{element?.user_name}</Table.Td>
@@ -151,53 +163,62 @@ export default function TableComponent({ data, user }) {
   ));
 
   return (
-    <Table
-      my={"lg"}
-      pt={"lg"}
-      w={"100%"}
-      striped
-      highlightOnHover
-      withTableBorder
-      withColumnBorders
-    >
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th>Xona/Stol raqami</Table.Th>
-          <Table.Th>Ofitsiant ismi</Table.Th>
-          <Table.Th>Umumiy summa</Table.Th>
-          <Table.Th>Sanasi</Table.Th>
-          <Table.Th>Ko'rish</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
+    <>
+      <Table
+        my={"lg"}
+        pt={"lg"}
+        w={"100%"}
+        striped
+        highlightOnHover
+        withTableBorder
+        withColumnBorders
+      >
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Xona/Stol raqami</Table.Th>
+            <Table.Th>Ofitsiant ismi</Table.Th>
+            <Table.Th>Umumiy summa</Table.Th>
+            <Table.Th>Sanasi</Table.Th>
+            <Table.Th>Ko'rish</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {currentData?.length ? (
+            rows
+          ) : (
+            <Table.Tr>
+              <Table.Th ta={"center"} colSpan={5}>
+                Malumotlar mavjud emas
+              </Table.Th>
+            </Table.Tr>
+          )}
+        </Table.Tbody>
         {data?.orders?.length ? (
-          rows
-        ) : (
-          <Table.Tr>
-            <Table.Th ta={"center"} colSpan={5}>
-              Malumotlar mavjud emas
-            </Table.Th>
-          </Table.Tr>
-        )}
-      </Table.Tbody>
-      {data?.orders?.length ? (
-        <Table.Tfoot>
-          <Table.Tr />
-          <Table.Tr>
-            <Table.Th colSpan={5}></Table.Th>
-          </Table.Tr>
-          <Table.Tr>
-            <Table.Th>
-              Umumiy summa: {formatCurrencyUZS(data?.total_turnover)}
-            </Table.Th>
-            <Table.Th>
-              Umumiy foyda: {formatCurrencyUZS(data?.total_profit)}
-            </Table.Th>
-            <Table.Th>Jami zarar: {data?.total_damage}</Table.Th>
-            <Table.Th>Jami buyurtmalar: {data?.total_cheque}</Table.Th>
-          </Table.Tr>
-        </Table.Tfoot>
-      ) : null}
-    </Table>
+          <Table.Tfoot>
+            <Table.Tr />
+            <Table.Tr>
+              <Table.Th colSpan={5}></Table.Th>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Th>
+                Umumiy summa: {formatCurrencyUZS(data?.total_turnover)}
+              </Table.Th>
+              <Table.Th>
+                Umumiy foyda: {formatCurrencyUZS(data?.total_profit)}
+              </Table.Th>
+              <Table.Th>Jami zarar: {data?.total_damage}</Table.Th>
+              <Table.Th>Jami buyurtmalar: {data?.total_cheque}</Table.Th>
+            </Table.Tr>
+          </Table.Tfoot>
+        ) : null}
+      </Table>
+      <Flex justify="center" mt="lg">
+        <Pagination
+          page={activePage}
+          onChange={setActivePage}
+          total={Math.ceil(data?.orders?.length / itemsPerPage)}
+        />
+      </Flex>
+    </>
   );
 }

@@ -12,6 +12,7 @@ import {
   LogOut,
   CategoryIcon,
   UsersIcon,
+  SettingsIcon,
 } from "../icon";
 import { getRequest, postRequest } from "../../services/api";
 import { useUser } from "../../redux/selectors";
@@ -24,6 +25,7 @@ const tabs = [
   { link: "/waiter", label: "Ofitsiant", icon: CopyBoard },
   { link: "/admins", label: "Ish boshqaruvchilar", icon: UsersIcon },
   { link: "/categories", label: "Kategoriyalar", icon: CategoryIcon },
+  { link: "/modifier", label: "Modifikatorlar", icon: SettingsIcon },
   { link: "/products", label: "Maxsulotlar", icon: Pizza },
   { link: "/rooms", label: "Xonalar/Stollar", icon: Room },
 ];

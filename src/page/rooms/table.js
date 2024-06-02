@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button, Menu, Table, Text } from "@mantine/core";
+import { Button, Menu, Table, Text, Pagination, Flex } from "@mantine/core";
 import { Eye, Trash } from "../../components/icon";
 import { getRequest } from "../../services/api";
 import { toast } from "react-toastify";
@@ -13,6 +13,7 @@ export default function TableComponent({ data, handleDelete, user }) {
     const [loading, setLoading] = useState(false);
     const [isPrintLoading, setIsPrintLoading] = useState(false);
     const componentRef = useRef();
+
     const handlePrint = () => {
       setIsPrintLoading(true);
       getRequest(`room/print/${room?.id}`, user?.token)
@@ -28,11 +29,7 @@ export default function TableComponent({ data, handleDelete, user }) {
           toast.error("Xatolik yuz berdi");
         });
     };
-    // useReactToPrint({
-    //   content: () => componentRef.current,
-    //   onAfterPrint: () => setOpen(false),
-    //   onBeforePrint: () => setOpen(true),
-    // });
+
     const getById = () => {
       setLoading(true);
       getRequest(`room/see/${data?.id}`, user?.token)
@@ -48,13 +45,14 @@ export default function TableComponent({ data, handleDelete, user }) {
           toast.error("Xatolik yuz berdi");
         });
     };
+
     return (
       <>
         <Button
           align={"center"}
           gap={10}
           loading={loading}
-          disabled={loading}
+          disabled={loading || !data?.is_active}
           onClick={getById}
         >
           <Eye />
@@ -109,7 +107,14 @@ export default function TableComponent({ data, handleDelete, user }) {
                           <hr />
                         </th>
                       </tr>
-
+                      <tr>
+                        <td className="left">
+                          Mijozlar soni: {room?.count_client}
+                        </td>
+                        <td className="left" colSpan={2}>
+                          {room?.count_client * 3000} so'm
+                        </td>
+                      </tr>
                       <tr>
                         <td className="left" colSpan={3}>
                           Bizni tanlaganingiz uchun raxmat!
@@ -133,7 +138,15 @@ export default function TableComponent({ data, handleDelete, user }) {
       </>
     );
   };
-  const rows = data?.map((element) => (
+
+  const [activePage, setActivePage] = useState(1);
+  const itemsPerPage = 10;
+
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = data?.slice(startIndex, endIndex);
+
+  const rows = currentData?.map((element) => (
     <Table.Tr
       key={element?.id}
       bg={element?.is_active ? "red" : undefined}
@@ -153,6 +166,7 @@ export default function TableComponent({ data, handleDelete, user }) {
           width={200}
           transitionProps={{ transition: "pop", duration: 150 }}
           position="left-start"
+          disabled={element?.is_active}
         >
           <Menu.Target>
             <Button
@@ -179,35 +193,44 @@ export default function TableComponent({ data, handleDelete, user }) {
   ));
 
   return (
-    <Table
-      my={"lg"}
-      pt={"lg"}
-      w={"100%"}
-      striped
-      highlightOnHover
-      withTableBorder
-      withColumnBorders
-    >
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th>Xona/Stol raqami</Table.Th>
-          <Table.Th>Status</Table.Th>
-          <Table.Th>Nechi kishilik</Table.Th>
-          <Table.Th>Ko'rish</Table.Th>
-          <Table.Th>O'chirish</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
-        {data?.length ? (
-          rows
-        ) : (
+    <>
+      <Table
+        my={"lg"}
+        pt={"lg"}
+        w={"100%"}
+        striped
+        highlightOnHover
+        withTableBorder
+        withColumnBorders
+      >
+        <Table.Thead>
           <Table.Tr>
-            <Table.Th ta="center" colSpan={5}>
-              Ma'lumot yo'q
-            </Table.Th>
+            <Table.Th>Xona/Stol raqami</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <Table.Th>Nechi kishilik</Table.Th>
+            <Table.Th>Ko'rish</Table.Th>
+            <Table.Th>O'chirish</Table.Th>
           </Table.Tr>
-        )}
-      </Table.Tbody>
-    </Table>
+        </Table.Thead>
+        <Table.Tbody>
+          {currentData?.length ? (
+            rows
+          ) : (
+            <Table.Tr>
+              <Table.Th ta="center" colSpan={5}>
+                Ma'lumot yo'q
+              </Table.Th>
+            </Table.Tr>
+          )}
+        </Table.Tbody>
+      </Table>
+      <Flex justify="center" mt="lg">
+        <Pagination
+          page={activePage}
+          onChange={setActivePage}
+          total={Math.ceil(data?.length / itemsPerPage)}
+        />
+      </Flex>
+    </>
   );
 }

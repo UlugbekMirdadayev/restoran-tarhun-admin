@@ -127,7 +127,7 @@ export default function TableComponent({
       return String(values[key]) !== String(waiter[key]);
     });
 
-    if (!editedValues.length) {
+    if (!editedValues?.length) {
       toast.info("O'zgarishlar kiritilmadi");
       return;
     }

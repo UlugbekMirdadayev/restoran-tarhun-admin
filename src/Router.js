@@ -18,6 +18,7 @@ import Login from "./page/admin/login";
 import Category from "./page/category";
 import AdminsPage from "./page/admins";
 import { setRooms } from "./redux/roomSlice";
+import Modifier from "./page/modifier";
 
 const SOCKET_SERVER_URL = "wss://crmtarhun.dadabayev.uz/websocket/";
 
@@ -37,6 +38,10 @@ const routes = [
   {
     path: "/categories",
     element: <Category />,
+  },
+  {
+    path: "/modifier",
+    element: <Modifier />,
   },
   {
     path: "/rooms",

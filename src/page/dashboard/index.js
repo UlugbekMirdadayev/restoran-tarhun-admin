@@ -158,8 +158,8 @@ const Dashboard = () => {
       <Text fw={600} fz={"lg"}>
         {isTodayData
           ? "Bugungi 24 soatlik hisobot"
-          : value.filter(Boolean).length === 2
-          ? value.map(
+          : value?.filter(Boolean)?.length === 2
+          ? value?.map(
               (d, i) =>
                 moment(d).format("DD-MM-YYYY") + (i ? " gacha" : " dan ")
             )

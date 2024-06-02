@@ -7,6 +7,7 @@ import admin from "./adminSlice";
 import rooms from "./roomSlice";
 import products from "./productSlice";
 import categories from "./categoriesSlice";
+import modifiers from "./modifierSlice";
 import measurements from "./measurementSlice";
 
 const store = configureStore({
@@ -19,6 +20,7 @@ const store = configureStore({
     rooms,
     products,
     categories,
+    modifiers,
     measurements,
   },
 });

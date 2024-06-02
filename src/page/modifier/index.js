@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import TableComponent from "./table";
-import { useCategories, useUser } from "../../redux/selectors";
+import { useModifiers, useProducts, useUser } from "../../redux/selectors";
 import { useDispatch } from "react-redux";
 import { setLoader } from "../../redux/loaderSlice";
 import { getRequest } from "../../services/api";
@@ -10,35 +10,55 @@ import ModalScreen from "../../components/modal";
 import FormCreate from "./form";
 import { handleDelete } from "../../utils/helpers";
 import { PlusIcon, Reload } from "../../components/icon";
-import { setCategories } from "../../redux/categoriesSlice";
+import { setModifiers } from "../../redux/modifierSlice";
+import { setProducts } from "../../redux/productSlice";
 
-const Room = () => {
+const Modifier = () => {
   const user = useUser();
-  const categories = useCategories();
+  const modifiers = useModifiers();
+  const products = useProducts();
   const [editForm, setEditForm] = useState(null);
 
   const dispatch = useDispatch();
 
-  const handleGetCategories = useCallback(
+  const handleGetModifiers = useCallback(
     (update) => {
-      if (!update && categories?.length) return;
+      if (!update && modifiers?.length) return;
       dispatch(setLoader(true));
-      getRequest("category/get", user?.token)
+      getRequest("product/modifier/get", user?.token)
         .then(({ data }) => {
           dispatch(setLoader(false));
-          dispatch(setCategories(data?.result));
+          dispatch(setModifiers(data?.result));
         })
         .catch((err) => {
           dispatch(setLoader(false));
           toast.error(err?.response?.data?.result || "Error");
         });
     },
-    [dispatch, categories?.length, user?.token]
+    [dispatch, modifiers?.length, user?.token]
+  );
+
+  const handleProducts = useCallback(
+    (update) => {
+      if (!update && products?.length) return;
+      dispatch(setLoader(true));
+      getRequest("product/get", user?.token)
+        .then(({ data }) => {
+          dispatch(setLoader(false));
+          dispatch(setProducts(data?.result));
+        })
+        .catch((err) => {
+          dispatch(setLoader(false));
+          toast.error(err?.response?.data?.result || "Error");
+        });
+    },
+    [dispatch, products?.length, user?.token]
   );
 
   useEffect(() => {
-    handleGetCategories();
-  }, [handleGetCategories]);
+    handleGetModifiers();
+    handleProducts();
+  }, [handleGetModifiers, handleProducts]);
 
   return (
     <div className="container-page">
@@ -50,23 +70,23 @@ const Room = () => {
         top={0}
         bg={"#fff"}
       >
-        <Title>Kategoriyalar</Title>
-        <Button onClick={() => handleGetCategories(true)}>
+        <Title>Modifikatorlar</Title>
+        <Button onClick={() => handleGetModifiers(true)}>
           <Flex align={"center"} gap={10}>
             <Reload fill="#fff" />
             <span>Ma'lumotlarni Yangilash</span>
           </Flex>
         </Button>
         <ModalScreen
-          title={"Yangi kategoriya qo'shish"}
+          title={`Yangi${editForm?.id ? "lash": " qo'shish"}`}
           btn_title={
             <Flex align={"center"} gap={10}>
-              <PlusIcon fill="#fff" /> <span>Yangi kategoriya qo'shish</span>
+              <PlusIcon fill="#fff" /> <span>Yangi qo'shish</span>
             </Flex>
           }
           body={({ close }) => (
             <FormCreate
-              handleUpdate={handleGetCategories}
+              handleUpdate={handleGetModifiers}
               setLoader={(boolean) => dispatch(setLoader(boolean))}
               close={() => {
                 close();
@@ -80,12 +100,12 @@ const Room = () => {
         />
       </Flex>
       <TableComponent
-        data={categories}
+        data={modifiers}
         handleDelete={(id) =>
           handleDelete(
-            `category/delete/${id}`,
+            `product/modifier/delete/${id}`,
             (boolean) => dispatch(setLoader(boolean)),
-            handleGetCategories,
+            handleGetModifiers,
             user?.token
           )
         }
@@ -95,4 +115,4 @@ const Room = () => {
   );
 };
 
-export default Room;
+export default Modifier;
