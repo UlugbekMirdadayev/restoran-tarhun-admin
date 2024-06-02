@@ -1,6 +1,6 @@
 import { Box, Button, Group, Select, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { postRequest, putRequest } from "../../services/api";
+import { postRequest } from "../../services/api";
 import { toast } from "react-toastify";
 import { useUser, useProducts } from "../../redux/selectors";
 
@@ -31,7 +31,7 @@ function FormCreate({ handleUpdate, close, setLoader, editForm }) {
     setLoader(true);
     if (editForm) {
       values.modifier_id = editForm?.id;
-      return putRequest("product/modifier/update", values, user?.token)
+      return postRequest("product/modifier/update", values, user?.token)
         .then(({ data }) => {
           setLoader(false);
           toast.info(data?.result || "Success");

@@ -1,9 +1,21 @@
-import React from "react";
-import { Button, Menu, Table, Text } from "@mantine/core";
+import React, { useState } from "react";
+import { Button, Menu, Table, Text, TextInput, Pagination } from "@mantine/core";
 import { Trash } from "../../components/icon";
 
 export default function TableComponent({ data, handleDelete, setEditForm }) {
-  const rows = data?.map((element) => (
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Har bir sahifadagi elementlar soni
+
+  const filteredData = data.filter((element) =>
+    element?.name?.toLowerCase().includes(search?.toLowerCase())
+  );
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = filteredData?.slice(startIndex, endIndex);
+
+  const rows = paginatedData.map((element) => (
     <Table.Tr key={element?.id}>
       <Table.Td>{element?.name}</Table.Td>
       <Table.Td>{element?.product?.name}</Table.Td>
@@ -44,34 +56,48 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
   ));
 
   return (
-    <Table
-      my={"lg"}
-      pt={"lg"}
-      w={"100%"}
-      striped
-      highlightOnHover
-      withTableBorder
-      withColumnBorders
-    >
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th>Nomi</Table.Th>
-          <Table.Th>Product</Table.Th>
-          <Table.Th>Tahrirlash</Table.Th>
-          <Table.Th>O'chirish</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
-        {data?.length ? (
-          rows
-        ) : (
+    <div>
+      <TextInput
+        placeholder="Qidirish..."
+        value={search}
+        onChange={(event) => setSearch(event.currentTarget.value)}
+        mb="lg"
+      />
+      <Table
+        my={"lg"}
+        pt={"lg"}
+        w={"100%"}
+        striped
+        highlightOnHover
+        withTableBorder
+        withColumnBorders
+      >
+        <Table.Thead>
           <Table.Tr>
-            <Table.Th ta="center" colSpan={5}>
-              Ma'lumot yo'q
-            </Table.Th>
+            <Table.Th>Nomi</Table.Th>
+            <Table.Th>Product</Table.Th>
+            <Table.Th>Tahrirlash</Table.Th>
+            <Table.Th>O'chirish</Table.Th>
           </Table.Tr>
-        )}
-      </Table.Tbody>
-    </Table>
+        </Table.Thead>
+        <Table.Tbody>
+          {paginatedData?.length ? (
+            rows
+          ) : (
+            <Table.Tr>
+              <Table.Th ta="center" colSpan={5}>
+                Ma'lumot yo'q
+              </Table.Th>
+            </Table.Tr>
+          )}
+        </Table.Tbody>
+      </Table>
+      <Pagination
+        total={Math.ceil(filteredData?.length / itemsPerPage)}
+        page={currentPage}
+        onChange={setCurrentPage}
+        my="lg"
+      />
+    </div>
   );
 }
