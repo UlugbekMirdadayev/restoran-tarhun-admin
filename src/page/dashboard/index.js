@@ -128,7 +128,7 @@ const Dashboard = () => {
               getReport(true, config);
             }}
             maxDate={new Date()}
-            minDate={new Date().setMonth(new Date().getMonth() - 1)}
+            minDate={new Date().setMonth(new Date().getMonth() - 3)}
           />
           <Button
             onClick={() => {

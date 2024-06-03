@@ -186,7 +186,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
         <Select
           required
           mt={"md"}
-          label="O'lchov birligi"
+          label="Sanog'i"
           data={[
             {
               value: "true",

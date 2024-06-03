@@ -51,7 +51,7 @@ const Product = () => {
           </Flex>
         </Button>
         <ModalScreen
-          title={"Yangi maxsulot qo'shish"}
+          title={`Yangi${editForm?.category?.id ? "lash": "  maxsulot qo'shish"}`}
           btn_title={
             <Flex align={"center"} gap={10}>
               <PlusIcon fill="#fff" /> <span>Yangi maxsulot qo'shish</span>

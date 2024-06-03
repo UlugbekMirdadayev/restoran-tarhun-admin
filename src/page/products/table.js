@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { formatCurrencyUZS } from "../../utils/helpers";
 import ModalScreen from "../../components/modal";
-import { Eye, Trash, Reload } from "../../components/icon";
+import { Eye, Trash, PenIcon } from "../../components/icon";
 import { IMAGE_URL } from "../../utils/constants";
 
 export default function TableComponent({ data, handleDelete, setEditForm }) {
@@ -96,7 +96,7 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
           display={"flex"}
           align={"center"}
         >
-          <Reload fill="#fff" /> <Text pl={10}>Maxsulotni yangilash</Text>
+          <PenIcon fill="#fff" /> <Text pl={10}>Maxsulotni yangilash</Text>
         </Button>
       </Table.Td>
     </Table.Tr>
@@ -122,7 +122,17 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
         withColumnBorders
       >
         {/* Your table header */}
-        <Table.Thead>{/* Your table header rows */}</Table.Thead>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Nomi</Table.Th>
+            <Table.Th>Tan narxi</Table.Th>
+            <Table.Th>Sotilish narxi</Table.Th>
+            <Table.Th>Kategoriya</Table.Th>
+            <Table.Th>Sanog'i</Table.Th>
+            <Table.Th>Rasm</Table.Th>
+            <Table.Th>O'chirish / Yangilash</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
         <Table.Tbody>
           {currentData?.length ? (
             rows
