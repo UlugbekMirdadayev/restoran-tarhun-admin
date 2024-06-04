@@ -33,6 +33,10 @@ const inputs = [
     name: "quantity",
     label: "Dona",
   },
+  {
+    name: "printer_ip",
+    label: "Printer IP",
+  },
 ];
 
 function FormCreate({ handleOrders, close, editForm, setEditForm }) {
@@ -54,6 +58,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
       quantity: editForm?.quantity || "",
       body_price: editForm?.body_price || "",
       sell_price: editForm?.sell_price || "",
+      printer_ip: editForm?.printer_ip || "",
     },
   });
 

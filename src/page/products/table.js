@@ -44,6 +44,7 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
       <Table.Td>{formatCurrencyUZS(element?.body_price)}</Table.Td>
       <Table.Td>{formatCurrencyUZS(element?.sell_price)}</Table.Td>
       <Table.Td>{element?.category?.name}</Table.Td>
+      <Table.Td>{element?.printer_ip}</Table.Td>
       <Table.Td>
         {element?.is_infinite ? "Cheksiz" : element?.quantity}
       </Table.Td>
@@ -128,6 +129,7 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
             <Table.Th>Tan narxi</Table.Th>
             <Table.Th>Sotilish narxi</Table.Th>
             <Table.Th>Kategoriya</Table.Th>
+            <Table.Th>Printer IP</Table.Th>
             <Table.Th>Sanog'i</Table.Th>
             <Table.Th>Rasm</Table.Th>
             <Table.Th>O'chirish / Yangilash</Table.Th>

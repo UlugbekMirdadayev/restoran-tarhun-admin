@@ -6,7 +6,6 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
   const rows = data?.map((element) => (
     <Table.Tr key={element?.id}>
       <Table.Td>{element?.name}</Table.Td>
-      <Table.Td>{element?.printer_ip}</Table.Td>
       <Table.Td>
         <Button onClick={() => setEditForm(element)}>
           <Text fw={600}>Tahrirlash</Text>
@@ -56,7 +55,6 @@ export default function TableComponent({ data, handleDelete, setEditForm }) {
       <Table.Thead>
         <Table.Tr>
           <Table.Th>Nomi</Table.Th>
-          <Table.Th>Printer IP</Table.Th>
           <Table.Th>Tahrirlash</Table.Th>
           <Table.Th>O'chirish</Table.Th>
         </Table.Tr>
