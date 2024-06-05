@@ -1,4 +1,4 @@
-import { Box, Button, Group, NumberInput, Select } from "@mantine/core";
+import { Box, Button, Group, NumberInput, Select, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { postRequest } from "../../services/api";
 import { toast } from "react-toastify";
@@ -8,7 +8,7 @@ const inputs = [
   {
     name: "name",
     label: "Xona/Stol raqami",
-    as: NumberInput,
+    as: TextInput,
   },
   {
     name: "places",

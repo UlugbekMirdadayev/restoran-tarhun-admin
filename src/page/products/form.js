@@ -6,6 +6,7 @@ import {
   Select,
   FileInput,
   Image,
+  NumberInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
@@ -20,22 +21,27 @@ const inputs = [
   {
     name: "name",
     label: "Nomi",
+    as: TextInput,
   },
   {
     name: "body_price",
     label: "Tan narxi",
+    as: NumberInput,
   },
   {
     name: "sell_price",
     label: "Sotilish narxi",
-  },
-  {
-    name: "quantity",
-    label: "Dona",
+    as: NumberInput,
   },
   {
     name: "printer_ip",
     label: "Printer IP",
+    as: NumberInput,
+  },
+  {
+    name: "quantity",
+    label: "Dona",
+    as: NumberInput,
   },
 ];
 
@@ -54,7 +60,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
       measurement_id: String(editForm?.measurement?.id || measurements[0]?.id),
       name: editForm?.name || "",
       photo: image,
-      is_infinite: String(editForm?.is_infinite || "false"),
+      is_infinite: editForm?.is_infinite ? "true" : "false",
       quantity: editForm?.quantity || "",
       body_price: editForm?.body_price || "",
       sell_price: editForm?.sell_price || "",
@@ -63,7 +69,6 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
   });
 
   const onSubmit = (values) => {
-    if (!values.photo) return toast.info("Rasm yuklang !");
     values.is_infinite === "true" && delete values.quantity;
     const formData = new FormData();
     Object.keys(values).map((key) =>
@@ -95,9 +100,8 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
     if (editForm?.id) {
       formData.append("product_id", editForm.id);
       formData.append("_method", "PUT");
-      formData.delete("is_infinite");
 
-      if (editForm?.image_path) {
+      if (editForm?.image_path || image === null) {
         formData.delete("photo");
       }
 
@@ -115,6 +119,10 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
           toast.error(JSON.stringify(err?.response?.data));
         });
       return;
+    }
+
+    if (image === null) {
+      formData.delete("photo");
     }
     dispatch(setLoader(true));
     postRequest("product/create", formData, user?.token)
@@ -135,7 +143,6 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
     <Box mx="auto">
       <form onSubmit={form.onSubmit(onSubmit)}>
         <FileInput
-          required
           label={
             image ? (
               <Image
@@ -174,7 +181,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
           }}
         />
         {inputs?.map((input) => (
-          <TextInput
+          <input.as
             key={input.name}
             mt={"md"}
             required

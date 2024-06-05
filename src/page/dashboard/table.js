@@ -115,6 +115,24 @@ export default function TableComponent({ data, user }) {
                         </td>
                       </tr>
                       <tr>
+                        <th colSpan={3}>
+                          <hr />
+                        </th>
+                      </tr>
+                      <tr>
+                        <td className="left" colSpan={2}>
+                          Ofitsant ismi
+                        </td>
+                        <td className="right">
+                          {data?.user_name}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th colSpan={3}>
+                          <hr />
+                        </th>
+                      </tr>
+                      <tr>
                         <td className="left" colSpan={2}>
                           Umumiy summa
                         </td>

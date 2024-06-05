@@ -30,6 +30,18 @@ export default function TableComponent({ data, handleDelete, user }) {
         });
     };
 
+    const handleComplete = ()=> { 
+      getRequest(`room/end/${room?.id}`, user?.token).then(({ data }) => {
+        setIsPrintLoading(false);
+        toast.success(data?.result);
+        setOpen(false);
+      })
+      .catch((err) => {
+        setIsPrintLoading(false);
+        toast.error("Xatolik yuz berdi");
+      });
+    }
+
     const getById = () => {
       setLoading(true);
       getRequest(`room/see/${data?.id}`, user?.token)
@@ -111,8 +123,16 @@ export default function TableComponent({ data, handleDelete, user }) {
                         <td className="left">
                           Mijozlar soni: {room?.count_client}
                         </td>
-                        <td className="left" colSpan={2}>
+                        <td className="right" colSpan={2}>
                           {room?.count_client * 3000} so'm
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="left" colSpan={2}>
+                          Ofitsant ismi
+                        </td>
+                        <td className="right">
+                          {data?.user_name}
                         </td>
                       </tr>
                       <tr>
@@ -130,6 +150,14 @@ export default function TableComponent({ data, handleDelete, user }) {
                   loading={isPrintLoading}
                 >
                   Check chiqarish
+                </Button>
+                <Button
+                  w={"100%"}
+                  mt={"lg"}
+                  onClick={handleComplete}
+                  loading={isPrintLoading}
+                >
+                  Buyurtmani yopish
                 </Button>
               </div>
             </div>
@@ -153,13 +181,14 @@ export default function TableComponent({ data, handleDelete, user }) {
       c={element?.is_active ? "#fff" : undefined}
     >
       <Table.Td>
-        {element?.name} {element.room_type_name}
+        {element?.name}
       </Table.Td>
       <Table.Td>{element?.is_active ? "Joy Band" : "Joy Band emas"}</Table.Td>
       <Table.Td>{element?.places}</Table.Td>
       <Table.Td>
         <TableCheck data={element} />
       </Table.Td>
+      <Table.Td>{element?.user_name}</Table.Td>
       <Table.Td>
         <Menu
           shadow="md"
@@ -209,6 +238,7 @@ export default function TableComponent({ data, handleDelete, user }) {
             <Table.Th>Status</Table.Th>
             <Table.Th>Nechi kishilik</Table.Th>
             <Table.Th>Ko'rish</Table.Th>
+            <Table.Th>Ofitsant ismi</Table.Th>
             <Table.Th>O'chirish</Table.Th>
           </Table.Tr>
         </Table.Thead>
