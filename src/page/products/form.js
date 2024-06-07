@@ -36,7 +36,7 @@ const inputs = [
   {
     name: "printer_ip",
     label: "Printer IP",
-    as: NumberInput,
+    as: TextInput,
   },
   {
     name: "quantity",

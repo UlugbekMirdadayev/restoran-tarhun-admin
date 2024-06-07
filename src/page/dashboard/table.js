@@ -1,12 +1,12 @@
 import React, { useRef, useState } from "react";
-import { Button, Table, Pagination, Flex } from "@mantine/core";
+import { Button, Table, Pagination, Flex, Menu } from "@mantine/core";
 import moment from "moment";
 import { formatCurrencyUZS } from "../../utils/helpers";
-import { Eye } from "../../components/icon";
+import { Eye, Reload } from "../../components/icon";
 import { getRequest } from "../../services/api";
 import { toast } from "react-toastify";
 
-export default function TableComponent({ data, user }) {
+export default function TableComponent({ data, user, onUpdate }) {
   const TableCheck = ({ data }) => {
     const [open, setOpen] = useState(false);
     const [order, setOrder] = useState({});
@@ -123,9 +123,7 @@ export default function TableComponent({ data, user }) {
                         <td className="left" colSpan={2}>
                           Ofitsant ismi
                         </td>
-                        <td className="right">
-                          {data?.user_name}
-                        </td>
+                        <td className="right">{data?.user_name}</td>
                       </tr>
                       <tr>
                         <th colSpan={3}>
@@ -166,6 +164,17 @@ export default function TableComponent({ data, user }) {
   const endIndex = startIndex + itemsPerPage;
   const currentData = data?.orders?.slice(startIndex, endIndex);
 
+  const handleBackup = (order_id) => {
+    getRequest(`order/backup/${order_id}`, user?.token)
+      .then(({ data }) => {
+        console.log(data);
+        onUpdate();
+      })
+      .catch((err) => {
+        toast.error(JSON.stringify(err));
+      });
+  };
+
   const rows = currentData?.map((element) => (
     <Table.Tr key={element?.id}>
       <Table.Td>{element?.room_name}</Table.Td>
@@ -173,6 +182,29 @@ export default function TableComponent({ data, user }) {
       <Table.Td>{formatCurrencyUZS(element?.total)}</Table.Td>
       <Table.Td>
         {moment(element?.created_at).format("DD-MM-YYYY HH:mm")}
+      </Table.Td>
+      <Table.Td display={"flex"}>
+        <Menu
+          shadow="md"
+          width={200}
+          transitionProps={{ transition: "pop", duration: 150 }}
+          position="left-start"
+        >
+          <Menu.Target>
+            <Button display={"flex"} align={"center"}>
+              <Reload fill="#fff" />
+            </Button>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            <Menu.Label>Rozimisiz</Menu.Label>
+            <Menu.Divider />
+            <Menu.Item onClick={() => handleBackup(element?.id)}>
+              Ha, roziman
+            </Menu.Item>
+            <Menu.Item>Yo'q, keyinroq</Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </Table.Td>
       <Table.Td>
         <TableCheck data={element} />
@@ -197,6 +229,7 @@ export default function TableComponent({ data, user }) {
             <Table.Th>Ofitsiant ismi</Table.Th>
             <Table.Th>Umumiy summa</Table.Th>
             <Table.Th>Sanasi</Table.Th>
+            <Table.Th>Backup</Table.Th>
             <Table.Th>Ko'rish</Table.Th>
           </Table.Tr>
         </Table.Thead>

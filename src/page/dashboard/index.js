@@ -170,6 +170,7 @@ const Dashboard = () => {
         data={report}
         user={user}
         setLoader={(boolean) => dispatch(setLoader(boolean))}
+        onUpdate={() => getReport(true)}
       />
     </div>
   );
