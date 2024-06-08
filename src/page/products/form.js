@@ -70,6 +70,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
 
   const onSubmit = (values) => {
     values.is_infinite === "true" && delete values.quantity;
+    values.is_infinite = values.is_infinite === "true" ? 1 : 0;
     const formData = new FormData();
     Object.keys(values).map((key) =>
       formData.append(
@@ -88,8 +89,6 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
           formData.delete("measurement_id");
         return String(editForm["measurement"]?.id) !== values[key];
       }
-      if (key === "is_infinite" && editForm.is_infinite === undefined)
-        return false;
       if (key === "photo" && !editForm.image_path) return true;
       editForm[key] === values[key] && formData.delete(key);
       return editForm[key] !== values[key] && key !== "photo";
@@ -98,6 +97,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
     if (!editedInputs?.length)
       return toast.info("O'zgartirishlar kiritilmadi !");
     if (editForm?.id) {
+      formData.append("printer_ip", editForm.printer_ip);
       formData.append("product_id", editForm.id);
       formData.append("_method", "PUT");
 
