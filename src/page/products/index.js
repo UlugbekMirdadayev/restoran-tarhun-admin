@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import TableComponent from "./table";
-import { useProducts, useUser } from "../../redux/selectors";
+import { useCategories, useProducts, useUser } from "../../redux/selectors";
 import { useDispatch } from "react-redux";
 import { setLoader } from "../../redux/loaderSlice";
 import { getRequest } from "../../services/api";
@@ -14,16 +14,20 @@ import { PlusIcon, Reload } from "../../components/icon";
 
 const Product = () => {
   const user = useUser();
+  const categories = useCategories();
   const products = useProducts();
   const [editForm, setEditForm] = useState({});
 
   const dispatch = useDispatch();
 
   const handleOrders = useCallback(
-    (update) => {
+    (update, category_id) => {
       if (!update && products?.length) return;
       dispatch(setLoader(true));
-      getRequest("product/get", user?.token)
+      getRequest(
+        `product/get${category_id ? `/${category_id}` : ""}`,
+        user?.token
+      )
         .then(({ data }) => {
           dispatch(setLoader(false));
           dispatch(setProducts(data?.result));
@@ -43,18 +47,20 @@ const Product = () => {
   return (
     <div className="container-page">
       <Flex justify={"space-between"} align={"center"}>
-        <Title>Maxsulotlar</Title>
+        <Title>Продукты</Title>
         <Button onClick={() => handleOrders(true)}>
           <Flex align={"center"} gap={10}>
             <Reload fill="#fff" />
-            <span>Ma'lumotlarni Yangilash</span>
+            <span>Обновление Данных</span>
           </Flex>
         </Button>
         <ModalScreen
-          title={`Yangi${editForm?.category?.id ? "lash": "  maxsulot qo'shish"}`}
+          title={`${
+            editForm?.category?.id ? "Обновить" : "Добавление нового продукта"
+          }`}
           btn_title={
             <Flex align={"center"} gap={10}>
-              <PlusIcon fill="#fff" /> <span>Yangi maxsulot qo'shish</span>
+              <PlusIcon fill="#fff" /> <span>Добавление нового продукта</span>
             </Flex>
           }
           body={({ close, open }) => (
@@ -71,6 +77,7 @@ const Product = () => {
         />
       </Flex>
       <TableComponent
+        categories={categories}
         data={products}
         handleDelete={(id) =>
           handleDelete(

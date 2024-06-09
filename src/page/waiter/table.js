@@ -211,7 +211,7 @@ export default function TableComponent({
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Yangilash">
+      <Modal opened={opened} onClose={close} title="Обновить">
         <form onSubmit={form.onSubmit(onSubmit)}>
           {inputs.map((input) => (
             <input.as
@@ -250,7 +250,7 @@ export default function TableComponent({
             <Table.Th>Status</Table.Th>
             <Table.Th>Ofitsiant ismi</Table.Th>
             <Table.Th>Ofitsiant Raqami</Table.Th>
-            <Table.Th>Yangilash</Table.Th>
+            <Table.Th>Обновить</Table.Th>
             <Table.Th>Ishdan olish</Table.Th>
           </Table.Tr>
         </Table.Thead>

@@ -1,6 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Button, Flex, Select, Text, Title } from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ActionIcon,
+  Button,
+  Flex,
+  Select,
+  Text,
+  Title,
+  rem,
+} from "@mantine/core";
+import { DatePickerInput, TimeInput } from "@mantine/dates";
 import moment from "moment";
 import { useDispatch } from "react-redux";
 import TableComponent from "./table";
@@ -9,6 +17,7 @@ import { setLoader } from "../../redux/loaderSlice";
 import { postRequest } from "../../services/api";
 import { setReport } from "../../redux/reportSlice";
 import { Reload } from "../../components/icon";
+import { IconClock } from "@tabler/icons-react";
 
 const Dashboard = () => {
   const user = useUser();
@@ -16,14 +25,19 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [isTodayData, setIsTodayData] = useState(false);
   const [value, setValue] = useState([
-    new Date(new Date().setDate(new Date().getDate() - 7)),
-    new Date(),
+    new Date(
+      new Date(
+        new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0)
+      ).setMinutes(0)
+    ),
+    new Date(new Date(new Date().setHours(23)).setMinutes(59)),
   ]);
   const [isWaiter, setIsWaiter] = useState({
     id: "all",
     full_name: "",
   });
   const report = useReport();
+  const [ref1, ref2] = [useRef(null), useRef(null)];
 
   const getReport = useCallback(
     (update, config = {}) => {
@@ -46,9 +60,15 @@ const Dashboard = () => {
     if (report?.length) return null;
     getReport(true, {
       from_date: moment(
-        new Date(new Date().setDate(new Date().getDate() - 7))
-      ).format("YYYY-MM-DD"),
-      to_date: moment(new Date()).format("YYYY-MM-DD"),
+        new Date(
+          new Date(
+            new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0)
+          ).setMinutes(0)
+        )
+      ).format("YYYY-MM-DD HH:mm:ss"),
+      to_date: moment(
+        new Date(new Date(new Date().setHours(23)).setMinutes(59))
+      ).format("YYYY-MM-DD HH:mm:ss"),
     });
   }, [getReport, report?.length]);
 
@@ -60,7 +80,7 @@ const Dashboard = () => {
           <Button onClick={() => getReport(true)}>
             <Flex align={"center"} gap={10}>
               <Reload fill="#fff" />
-              <span>Ma'lumotlarni Yangilash</span>
+              <span>Обновление Данных</span>
             </Flex>
           </Button>
         </Flex>
@@ -89,8 +109,8 @@ const Dashboard = () => {
               });
 
               const config = {
-                from_date: moment(value[0]).format("YYYY-MM-DD"),
-                to_date: moment(value[1]).format("YYYY-MM-DD"),
+                from_date: moment(value[0]).format("YYYY-MM-DD HH:mm:ss"),
+                to_date: moment(value[1]).format("YYYY-MM-DD HH:mm:ss"),
                 user_id: _value,
               };
 
@@ -103,41 +123,130 @@ const Dashboard = () => {
                 delete config.to_date;
               }
 
-              getReport(true, config);
+              // getReport(true, config);
             }}
           />
-          <DatePickerInput
-            required
-            label="Sanasi bo'yicha"
-            type="range"
-            value={value}
-            onChange={(date) => {
-              setValue(date);
-              setIsTodayData(false);
-              if (!date[0] || !date[1]) {
-                return null;
-              }
-              const config = {
-                from_date: moment(date[0]).format("YYYY-MM-DD"),
-                to_date: moment(date[1]).format("YYYY-MM-DD"),
-                user_id: isWaiter?.id,
-              };
-              if (!isWaiter?.id || isWaiter?.id === "all") {
-                delete config.user_id;
-              }
-              getReport(true, config);
-            }}
-            maxDate={new Date()}
-            minDate={new Date().setMonth(new Date().getMonth() - 3)}
-          />
+          <Flex direction={"column"}>
+            <DatePickerInput
+              required
+              label="Sanasi bo'yicha"
+              type="range"
+              value={value}
+              onChange={(date) => {
+                date = date?.filter(Boolean)?.length
+                  ? date
+                  : value?.filter(Boolean)?.length === 2
+                  ? value
+                  : [
+                    new Date(new Date(value[0].setHours(0)).setMinutes(0)),
+                      new Date(new Date(value[0].setHours(23)).setMinutes(59)),
+                    ];
+
+                setValue(date);
+                setIsTodayData(false);
+                if (!date[0] || !date[1]) {
+                  return null;
+                }
+
+                const config = {
+                  from_date: moment(date[0]).format("YYYY-MM-DD HH:mm:ss"),
+                  to_date: moment(date[1]).format("YYYY-MM-DD HH:mm:ss"),
+                  user_id: isWaiter?.id,
+                };
+                if (!isWaiter?.id || isWaiter?.id === "all") {
+                  delete config.user_id;
+                }
+                getReport(true, config);
+              }}
+              maxDate={new Date()}
+              minDate={new Date().setMonth(new Date().getMonth() - 3)}
+            />
+            <Flex align={"center"} justify={"space-between"} mt={"sm"}>
+              <TimeInput
+                ref={ref1}
+                value={moment(value[0]).format("HH:mm")}
+                onChange={(e) => {
+                  const date = new Date(value[0]);
+                  date.setHours(e.target.value?.split(":")[0]);
+                  date.setMinutes(e.target.value?.split(":")[1]);
+                  setValue([new Date(date), value[1]]);
+
+                  const config = {
+                    from_date: moment(new Date(date)).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    ),
+                    to_date: moment(value[1]).format("YYYY-MM-DD HH:mm:ss"),
+                    user_id: isWaiter?.id,
+                  };
+                  if (!isWaiter?.id || isWaiter?.id === "all") {
+                    delete config.user_id;
+                  }
+                  getReport(true, config);
+                }}
+                rightSection={
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    onClick={() => ref1.current?.showPicker()}
+                  >
+                    <IconClock
+                      style={{ width: rem(16), height: rem(16) }}
+                      stroke={1.5}
+                    />
+                  </ActionIcon>
+                }
+              />
+              <TimeInput
+                ref={ref2}
+                value={moment(value[1]).format("HH:mm")}
+                rightSection={
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    onClick={() => ref2.current?.showPicker()}
+                  >
+                    <IconClock
+                      style={{ width: rem(16), height: rem(16) }}
+                      stroke={1.5}
+                    />
+                  </ActionIcon>
+                }
+                onChange={(e) => {
+                  const date = new Date(value[1]);
+                  date.setHours(e.target.value?.split(":")[0]);
+                  date.setMinutes(e.target.value?.split(":")[1]);
+                  setValue([value[0], new Date(date)]);
+
+                  const config = {
+                    from_date: moment(new Date(value[0])).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    ),
+                    to_date: moment(new Date(date)).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    ),
+                    user_id: isWaiter?.id,
+                  };
+                  if (!isWaiter?.id || isWaiter?.id === "all") {
+                    delete config.user_id;
+                  }
+                  getReport(true, config);
+                }}
+              />
+            </Flex>
+          </Flex>
           <Button
             onClick={() => {
               if (isTodayData) return null;
-              setValue([new Date(), new Date()]);
+              const dates = [new Date(), new Date()];
               setIsTodayData(true);
+              dates[0].setHours("00");
+              dates[0].setMinutes("00");
+              dates[1].setHours("23");
+              dates[1].setMinutes("59");
+              setValue(dates);
               const config = {
-                from_date: moment().format("YYYY-MM-DD"),
-                to_date: moment().format("YYYY-MM-DD"),
+                from_date: moment(dates[0]).format("YYYY-MM-DD HH:mm:ss"),
+                to_date: moment(dates[1]).format("YYYY-MM-DD HH:mm:ss"),
                 user_id: isWaiter?.id,
               };
               if (!isWaiter?.id || isWaiter?.id === "all") {

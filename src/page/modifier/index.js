@@ -74,7 +74,7 @@ const Modifier = () => {
         <Button onClick={() => handleGetModifiers(true)}>
           <Flex align={"center"} gap={10}>
             <Reload fill="#fff" />
-            <span>Ma'lumotlarni Yangilash</span>
+            <span>Обновление Данных</span>
           </Flex>
         </Button>
         <ModalScreen

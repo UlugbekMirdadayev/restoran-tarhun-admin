@@ -20,27 +20,27 @@ import { IMAGE_URL } from "../../utils/constants";
 const inputs = [
   {
     name: "name",
-    label: "Nomi",
+    label: "Имя",
     as: TextInput,
   },
   {
     name: "body_price",
-    label: "Tan narxi",
+    label: "Стоимость",
     as: NumberInput,
   },
   {
     name: "sell_price",
-    label: "Sotilish narxi",
+    label: "Цена продажи",
     as: NumberInput,
   },
   {
     name: "printer_ip",
-    label: "Printer IP",
+    label: "IP-адрес принтера",
     as: TextInput,
   },
   {
     name: "quantity",
-    label: "Dona",
+    label: "Количество",
     as: NumberInput,
   },
 ];
@@ -61,6 +61,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
       name: editForm?.name || "",
       photo: image,
       is_infinite: editForm?.is_infinite ? "true" : "false",
+      disabled: editForm?.disabled ? "true" : "false",
       quantity: editForm?.quantity || "",
       body_price: editForm?.body_price || "",
       sell_price: editForm?.sell_price || "",
@@ -71,6 +72,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
   const onSubmit = (values) => {
     values.is_infinite === "true" && delete values.quantity;
     values.is_infinite = values.is_infinite === "true" ? 1 : 0;
+    values.disabled = values.disabled === "true" ? 1 : 0;
     const formData = new FormData();
     Object.keys(values).map((key) =>
       formData.append(
@@ -94,8 +96,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
       return editForm[key] !== values[key] && key !== "photo";
     });
 
-    if (!editedInputs?.length)
-      return toast.info("O'zgartirishlar kiritilmadi !");
+    if (!editedInputs?.length) return toast.info("Никаких изменений !");
     if (editForm?.id) {
       formData.append("printer_ip", editForm.printer_ip);
       formData.append("product_id", editForm.id);
@@ -156,7 +157,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
                 }}
               />
             ) : (
-              "Rasm"
+              "Изображение продукта"
             )
           }
           styles={{
@@ -166,8 +167,8 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
               justifyContent: "center",
             },
           }}
-          description="Rasm tanlang"
-          placeholder="Rasm tanlang"
+          description="выберите изображение"
+          placeholder="выберите изображение"
           accept="image/*"
           {...form.getInputProps("photo")}
           onChange={(object) => {
@@ -198,16 +199,16 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
         <Select
           required
           mt={"md"}
-          label="Sanog'i"
+          label="Бесконечный/Ограничено"
           data={[
             {
               value: "true",
-              label: "Cheksiz",
+              label: "Бесконечный",
               disabled: form.values.is_infinite === "true",
             },
             {
               value: "false",
-              label: "Chegaralanadi",
+              label: "Ограничено",
               disabled: form.values.is_infinite === "false",
             },
           ]}
@@ -216,7 +217,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
         <Select
           required
           mt={"md"}
-          label="O'lchov birligi"
+          label="Единица измерения"
           data={measurements.map((item) => ({
             value: String(item?.id),
             label: item?.name,
@@ -227,7 +228,7 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
         <Select
           required
           mt={"md"}
-          label="Kategoriya"
+          label="Категория"
           data={categories.map((item) => ({
             value: String(item?.id),
             label: item?.name,
@@ -236,8 +237,27 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
           {...form.getInputProps("category_id")}
         />
 
+        <Select
+          required
+          mt={"md"}
+          label="Отключено"
+          data={[
+            {
+              value: "true",
+              label: "Отключено",
+              disabled: form.values.disabled === "true",
+            },
+            {
+              value: "false",
+              label: "Не отключено",
+              disabled: form.values.disabled === "false",
+            },
+          ]}
+          {...form.getInputProps("disabled")}
+        />
+
         <Group justify="flex-end" mt="md">
-          <Button type="submit">Yuborish</Button>
+          <Button type="submit">Отправить</Button>
         </Group>
       </form>
     </Box>
