@@ -15,6 +15,7 @@ import { formatCurrencyUZS } from "../../utils/helpers";
 import ModalScreen from "../../components/modal";
 import { Eye, Trash, PenIcon } from "../../components/icon";
 import { IMAGE_URL } from "../../utils/constants";
+import { IconChartHistogram } from "@tabler/icons-react";
 
 export default function TableComponent({
   data,
@@ -26,6 +27,7 @@ export default function TableComponent({
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [selectedCategory, setSelectedCategory] = useState(""); // State for selected category
   const [selectedProduct, setSelectedProduct] = useState(null); // State for selected product in select tab
+  const [tabActive, setTabActive] = useState("product-list"); // State for selected product in select tab
 
   // Pagination states
   const [activePage, setActivePage] = useState(1);
@@ -55,15 +57,22 @@ export default function TableComponent({
   };
 
   const handleProductChange = (value) => {
-    console.log('====================================');
-    console.log(value);
-    console.log('====================================');
     const product = data.find((item) => item.id === +value);
     setSelectedProduct(product);
   };
 
   const rows = currentData?.map((element) => (
     <Table.Tr key={element?.id}>
+      <Table.Td
+        onClick={() => {
+          setTabActive("select-product");
+          setSelectedProduct(element);
+        }}
+      >
+        <Button>
+          <IconChartHistogram />
+        </Button>
+      </Table.Td>
       <Table.Td>{element?.name}</Table.Td>
       <Table.Td>{formatCurrencyUZS(element?.body_price)}</Table.Td>
       <Table.Td>{formatCurrencyUZS(element?.sell_price)}</Table.Td>
@@ -74,7 +83,7 @@ export default function TableComponent({
       </Table.Td>
       <Table.Td onClick={() => setImage(IMAGE_URL + element?.image_path)}>
         <ModalScreen
-          title={"PИзображение продукта"}
+          title={"Изображение продукта"}
           btn_title={
             <Flex align={"center"} gap={10}>
               <Eye /> <Text>Просмотр</Text>
@@ -130,17 +139,19 @@ export default function TableComponent({
 
   return (
     <>
-      <Tabs defaultValue="product-list">
-        <Tabs.List>
-          <Tabs.Tab value="product-list">Productlar ro'yxati</Tabs.Tab>
-          <Tabs.Tab value="select-product">Select product</Tabs.Tab>
+      <Tabs value={tabActive} onChange={setTabActive}>
+        <Tabs.List mb={"md"}>
+          <Tabs.Tab value="product-list">Список продуктов</Tabs.Tab>
+          <Tabs.Tab value="select-product">
+            История выбранного продукта
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="product-list">
           {/* Search input field */}
           <Flex justify="space-between">
             <TextInput
-              placeholder="Выберите категорию"
+              placeholder="Поиск..."
               value={searchQuery}
               onChange={handleSearch}
               style={{ marginBottom: 16, flex: 1, marginRight: 16 }}
@@ -169,6 +180,7 @@ export default function TableComponent({
             {/* Your table header */}
             <Table.Thead>
               <Table.Tr>
+                <Table.Th>История</Table.Th>
                 <Table.Th>Имя</Table.Th>
                 <Table.Th>Стоимость</Table.Th>
                 <Table.Th>Цена продажи</Table.Th>
@@ -270,7 +282,7 @@ export default function TableComponent({
                     }
                   >
                     <ModalScreen
-                      title={"PИзображение продукта"}
+                      title={"Изображение продукта"}
                       btn_title={
                         <Flex align={"center"} gap={10}>
                           <Eye /> <Text>Просмотр</Text>
