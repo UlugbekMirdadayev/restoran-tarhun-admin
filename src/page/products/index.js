@@ -88,6 +88,8 @@ const Product = () => {
           )
         }
         setEditForm={setEditForm}
+        user={user}
+        dispatch={dispatch}
       />
     </div>
   );

@@ -8,6 +8,7 @@ import {
   TextInput,
   NumberInput,
   Select,
+  PasswordInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
@@ -32,6 +33,7 @@ const inputs = [
     rightSection: <></>,
     maxLength: 13,
   },
+
   {
     name: "is_active",
     label: "Aktivmi",
@@ -62,6 +64,11 @@ const inputs = [
       },
     ],
   },
+  {
+    name: "password",
+    label: "Password",
+    as: PasswordInput,
+  },
 ];
 
 export default function TableComponent({
@@ -82,6 +89,7 @@ export default function TableComponent({
       phone_number: "",
       is_active: "1",
       role: "1",
+      password: "",
     },
   });
 
@@ -115,6 +123,7 @@ export default function TableComponent({
   };
 
   const onSubmit = (values) => {
+    !values?.password?.length && delete values.password;
     const editedValues = Object.keys(values).filter((key) => {
       if (key === "user_id") {
         return String(waiter?.id) !== String(values?.user_id);
@@ -179,6 +188,7 @@ export default function TableComponent({
               phone_number: String(element?.phone_number),
               is_active: element?.is_active ? "1" : "0",
               role: String(element?.role === 1 ? 1 : 0) || "1",
+              password: element?.password,
             });
             open();
           }}
@@ -217,8 +227,8 @@ export default function TableComponent({
             <input.as
               key={input.name}
               mt={"md"}
-              required
-              withAsterisk
+              required={input.name !== "password"}
+              withAsterisk={input.name !== "password"}
               label={input.label}
               placeholder={input.label}
               data={input.data?.map((element) => ({

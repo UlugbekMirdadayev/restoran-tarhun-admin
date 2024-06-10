@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Flex,
@@ -10,14 +10,25 @@ import {
   TextInput,
   Select,
   Tabs,
+  rem,
+  ActionIcon,
 } from "@mantine/core";
 import { formatCurrencyUZS } from "../../utils/helpers";
 import ModalScreen from "../../components/modal";
 import { Eye, Trash, PenIcon } from "../../components/icon";
 import { IMAGE_URL } from "../../utils/constants";
-import { IconChartHistogram } from "@tabler/icons-react";
+import { postRequest } from "../../services/api";
+import { toast } from "react-toastify";
+import { useProductHistories } from "../../redux/selectors";
+import { setProductHistories } from "../../redux/productHistoriesSlice";
+import moment from "moment";
+import { DatePickerInput, TimeInput } from "@mantine/dates";
+import { IconClock } from "@tabler/icons-react";
+import { setLoader } from "../../redux/loaderSlice";
 
 export default function TableComponent({
+  user,
+  dispatch,
   data,
   categories,
   handleDelete,
@@ -26,16 +37,29 @@ export default function TableComponent({
   const [image, setImage] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [selectedCategory, setSelectedCategory] = useState(""); // State for selected category
-  const [selectedProduct, setSelectedProduct] = useState(null); // State for selected product in select tab
   const [tabActive, setTabActive] = useState("product-list"); // State for selected product in select tab
+  const historiesData = useProductHistories();
+  const [ref1, ref2] = [useRef(null), useRef(null)];
 
   // Pagination states
   const [activePage, setActivePage] = useState(1);
+  const [historiesPage, setHistoriesPage] = useState(1);
+  const [isTodayData, setIsTodayData] = useState(false);
+  const [value, setValue] = useState([
+    new Date(
+      new Date(
+        new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0)
+      ).setMinutes(0)
+    ),
+    new Date(new Date(new Date().setHours(23)).setMinutes(59)),
+  ]);
   const itemsPerPage = 10;
 
   // Calculate the data for the current page
   const startIndex = (activePage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
+  const historiesStartIndex = (historiesPage - 1) * itemsPerPage;
+  const historiesEndIndex = historiesStartIndex + itemsPerPage;
 
   // Filter data based on search query and selected category
   const filteredData = data.filter(
@@ -44,7 +68,19 @@ export default function TableComponent({
       (selectedCategory ? item.category?.name === selectedCategory : true)
   );
 
+  const histories = {
+    products: historiesData?.products?.filter(
+      (item) =>
+        item?.name?.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        (selectedCategory ? item.category_name === selectedCategory : true)
+    ),
+  };
+
   const currentData = filteredData?.slice(startIndex, endIndex);
+  const currentHistories = histories?.products?.slice(
+    historiesStartIndex,
+    historiesEndIndex
+  );
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -56,23 +92,42 @@ export default function TableComponent({
     setActivePage(1); // Reset pagination when changing category
   };
 
-  const handleProductChange = (value) => {
-    const product = data.find((item) => item.id === +value);
-    setSelectedProduct(product);
-  };
+  const handleProductChange = useCallback(
+    (update, config) => {
+      if (!update && historiesData?.products?.length) return;
+      dispatch(setLoader(true));
+      postRequest("order/history", config, user?.token)
+        .then(({ data }) => {
+          dispatch(setLoader(false));
+          dispatch(setProductHistories(data?.result));
+        })
+        .catch((err) => {
+          dispatch(setLoader(false));
+          toast.error(JSON.stringify(err));
+          console.log(err, "--order/history--");
+        });
+    },
+    [user?.token, dispatch, historiesData?.products?.length]
+  );
+
+  useEffect(() => {
+    if (historiesData?.products?.length) return;
+    handleProductChange(true, {
+      from_date: moment(
+        new Date(
+          new Date(
+            new Date(new Date().setDate(new Date().getDate() - 7)).setHours(0)
+          ).setMinutes(0)
+        )
+      ).format("YYYY-MM-DD HH:mm:ss"),
+      to_date: moment(
+        new Date(new Date(new Date().setHours(23)).setMinutes(59))
+      ).format("YYYY-MM-DD HH:mm:ss"),
+    });
+  }, [handleProductChange, historiesData?.products?.length]);
 
   const rows = currentData?.map((element) => (
     <Table.Tr key={element?.id}>
-      <Table.Td
-        onClick={() => {
-          setTabActive("select-product");
-          setSelectedProduct(element);
-        }}
-      >
-        <Button>
-          <IconChartHistogram />
-        </Button>
-      </Table.Td>
       <Table.Td>{element?.name}</Table.Td>
       <Table.Td>{formatCurrencyUZS(element?.body_price)}</Table.Td>
       <Table.Td>{formatCurrencyUZS(element?.sell_price)}</Table.Td>
@@ -146,27 +201,27 @@ export default function TableComponent({
             История выбранного продукта
           </Tabs.Tab>
         </Tabs.List>
-
+        <Flex justify="space-between">
+          <TextInput
+            placeholder="Поиск..."
+            value={searchQuery}
+            onChange={handleSearch}
+            style={{ marginBottom: 16, flex: 1, marginRight: 16 }}
+          />
+          <Select
+            placeholder="Выберите категорию"
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            data={categories.map((category) => ({
+              value: category.name,
+              label: category.name,
+            }))}
+            style={{ marginBottom: 16, flex: 1 }}
+          />
+        </Flex>
         <Tabs.Panel value="product-list">
           {/* Search input field */}
-          <Flex justify="space-between">
-            <TextInput
-              placeholder="Поиск..."
-              value={searchQuery}
-              onChange={handleSearch}
-              style={{ marginBottom: 16, flex: 1, marginRight: 16 }}
-            />
-            <Select
-              placeholder="Выберите категорию"
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              data={categories.map((category) => ({
-                value: category.name,
-                label: category.name,
-              }))}
-              style={{ marginBottom: 16, flex: 1 }}
-            />
-          </Flex>
+
           {/* Your table component */}
           <Table
             my={"lg"}
@@ -180,7 +235,6 @@ export default function TableComponent({
             {/* Your table header */}
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>История</Table.Th>
                 <Table.Th>Имя</Table.Th>
                 <Table.Th>Стоимость</Table.Th>
                 <Table.Th>Цена продажи</Table.Th>
@@ -228,86 +282,205 @@ export default function TableComponent({
         </Tabs.Panel>
 
         <Tabs.Panel value="select-product">
-          <Select
-            placeholder="Выберите продукт"
-            value={selectedProduct?.id || ""}
-            onChange={handleProductChange}
-            data={data.map((product) => ({
-              value: String(product.id),
-              label: product.name,
-            }))}
-            style={{ marginBottom: 16 }}
-          />
-          {selectedProduct && (
-            <Table
-              my={"lg"}
-              pt={"lg"}
-              w={"100%"}
-              striped
-              highlightOnHover
-              withTableBorder
-              withColumnBorders
-            >
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Имя</Table.Th>
-                  <Table.Th>Стоимость</Table.Th>
-                  <Table.Th>Цена продажи</Table.Th>
-                  <Table.Th>Категория</Table.Th>
-                  <Table.Th>IP-адрес принтера</Table.Th>
-                  <Table.Th>Количество</Table.Th>
-                  <Table.Th>Изображение продукта</Table.Th>
-                  <Table.Th>Отключено</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                <Table.Tr>
-                  <Table.Td>{selectedProduct.name}</Table.Td>
-                  <Table.Td>
-                    {formatCurrencyUZS(selectedProduct.body_price)}
-                  </Table.Td>
-                  <Table.Td>
-                    {formatCurrencyUZS(selectedProduct.sell_price)}
-                  </Table.Td>
-                  <Table.Td>{selectedProduct.category?.name}</Table.Td>
-                  <Table.Td>{selectedProduct.printer_ip}</Table.Td>
-                  <Table.Td>
-                    {selectedProduct.is_infinite
-                      ? "Бесконечный"
-                      : selectedProduct.quantity}
-                  </Table.Td>
-                  <Table.Td
-                    onClick={() =>
-                      setImage(IMAGE_URL + selectedProduct.image_path)
-                    }
+          <Flex align={"flex-end"} gap={"sm"}>
+            <DatePickerInput
+              required
+              label="Sanasi bo'yicha"
+              type="range"
+              value={value}
+              onChange={(date) => {
+                date = date?.filter(Boolean)?.length
+                  ? date
+                  : value?.filter(Boolean)?.length === 2
+                  ? value
+                  : [
+                      new Date(new Date(value[0].setHours(0)).setMinutes(0)),
+                      new Date(new Date(value[0].setHours(23)).setMinutes(59)),
+                    ];
+
+                setValue(date);
+                setIsTodayData(false);
+                if (!date[0] || !date[1]) {
+                  return null;
+                }
+
+                const config = {
+                  from_date: moment(date[0]).format("YYYY-MM-DD HH:mm:ss"),
+                  to_date: moment(date[1]).format("YYYY-MM-DD HH:mm:ss"),
+                };
+                handleProductChange(true, config);
+              }}
+              maxDate={new Date()}
+              minDate={new Date().setMonth(new Date().getMonth() - 3)}
+            />
+            <Flex align={"center"} justify={"space-between"} gap={"md"}>
+              <TimeInput
+                ref={ref1}
+                value={moment(value[0]).format("HH:mm")}
+                onChange={(e) => {
+                  const date = new Date(value[0]);
+                  date.setHours(e.target.value?.split(":")[0]);
+                  date.setMinutes(e.target.value?.split(":")[1]);
+                  setValue([new Date(date), value[1]]);
+                }}
+                onBlur={(e) => {
+                  const date = new Date(value[0]);
+                  date.setHours(e.target.value?.split(":")[0]);
+                  date.setMinutes(e.target.value?.split(":")[1]);
+
+                  const config = {
+                    from_date: moment(new Date(date)).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    ),
+                    to_date: moment(value[1]).format("YYYY-MM-DD HH:mm:ss"),
+                  };
+
+                  handleProductChange(true, config);
+                }}
+                rightSection={
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    onClick={() => {
+                      ref1.current?.showPicker();
+                      ref1.current?.focus();
+                    }}
                   >
-                    <ModalScreen
-                      title={"Изображение продукта"}
-                      btn_title={
-                        <Flex align={"center"} gap={10}>
-                          <Eye /> <Text>Просмотр</Text>
-                        </Flex>
-                      }
-                      body={({ close }) => (
-                        <Image
-                          src={image}
-                          w={300}
-                          h={300}
-                          style={{
-                            objectFit: "contain",
-                            margin: "auto",
-                          }}
-                        />
-                      )}
+                    <IconClock
+                      style={{ width: rem(16), height: rem(16) }}
+                      stroke={1.5}
                     />
-                  </Table.Td>
-                  <Table.Td>
-                    {selectedProduct.disabled ? "Отключено" : "Не отключен"}
-                  </Table.Td>
+                  </ActionIcon>
+                }
+              />
+              <TimeInput
+                ref={ref2}
+                value={moment(value[1]).format("HH:mm")}
+                rightSection={
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    onClick={() => {
+                      ref2.current?.showPicker();
+                      ref2.current?.focus();
+                    }}
+                  >
+                    <IconClock
+                      style={{ width: rem(16), height: rem(16) }}
+                      stroke={1.5}
+                    />
+                  </ActionIcon>
+                }
+                onChange={(e) => {
+                  const date = new Date(value[1]);
+                  date.setHours(e.target.value?.split(":")[0]);
+                  date.setMinutes(e.target.value?.split(":")[1]);
+                  setValue([value[0], new Date(date)]);
+                }}
+                onBlur={(e) => {
+                  const date = new Date(value[1]);
+                  date.setHours(e.target.value?.split(":")[0]);
+                  date.setMinutes(e.target.value?.split(":")[1]);
+
+                  const config = {
+                    from_date: moment(new Date(value[0])).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    ),
+                    to_date: moment(new Date(date)).format(
+                      "YYYY-MM-DD HH:mm:ss"
+                    ),
+                  };
+
+                  handleProductChange(true, config);
+                }}
+              />
+            </Flex>
+            <Button
+              onClick={() => {
+                if (isTodayData) return null;
+                const dates = [new Date(), new Date()];
+                setIsTodayData(true);
+                dates[0].setHours("00");
+                dates[0].setMinutes("00");
+                dates[1].setHours("23");
+                dates[1].setMinutes("59");
+                setValue(dates);
+                const config = {
+                  from_date: moment(dates[0]).format("YYYY-MM-DD HH:mm:ss"),
+                  to_date: moment(dates[1]).format("YYYY-MM-DD HH:mm:ss"),
+                };
+                handleProductChange(true, config);
+              }}
+            >
+              Bugunlik hisobot
+            </Button>
+          </Flex>
+          <Table
+            my={"lg"}
+            pt={"lg"}
+            w={"100%"}
+            striped
+            highlightOnHover
+            withTableBorder
+            withColumnBorders
+          >
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Имя</Table.Th>
+                <Table.Th>Цена продажи</Table.Th>
+                <Table.Th>Категория</Table.Th>
+                <Table.Th>Количество</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {currentHistories?.length ? (
+                currentHistories.map((history) => (
+                  <Table.Tr key={history?.id}>
+                    <Table.Td>{history?.name}</Table.Td>
+                    <Table.Td>
+                      {formatCurrencyUZS(history?.sell_price)}
+                    </Table.Td>
+                    <Table.Td>{history?.category_name}</Table.Td>
+                    <Table.Td>
+                      {history?.quantity} {history?.measurement_name}
+                    </Table.Td>
+                  </Table.Tr>
+                ))
+              ) : (
+                <Table.Tr>
+                  <Table.Th ta="center" colSpan={4}>
+                    Нет данных
+                  </Table.Th>
                 </Table.Tr>
-              </Table.Tbody>
-            </Table>
-          )}
+              )}
+            </Table.Tbody>
+            <Table.Tfoot>
+              <Table.Tr
+                style={{
+                  borderTop: "var(--_tr-border-bottom, none)",
+                }}
+              >
+                <Table.Th ta="center">
+                  Все клиенты: {historiesData?.all_client}
+                </Table.Th>
+                <Table.Th ta="center">
+                  Все общее: {formatCurrencyUZS(historiesData?.all_total)}
+                </Table.Th>
+                <Table.Th ta="center">
+                  Прибыль от клиентов:
+                  {formatCurrencyUZS(historiesData?.profit_from_clients)}
+                </Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
+          </Table>
+          <Flex justify="center" mt="lg">
+            {/* Pagination component for histories */}
+            <Pagination
+              page={historiesPage}
+              onChange={setHistoriesPage}
+              total={Math.ceil(histories?.products?.length / itemsPerPage)}
+            />
+          </Flex>
         </Tabs.Panel>
       </Tabs>
     </>
