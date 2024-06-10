@@ -138,7 +138,7 @@ const Dashboard = () => {
                   : value?.filter(Boolean)?.length === 2
                   ? value
                   : [
-                    new Date(new Date(value[0].setHours(0)).setMinutes(0)),
+                      new Date(new Date(value[0].setHours(0)).setMinutes(0)),
                       new Date(new Date(value[0].setHours(23)).setMinutes(59)),
                     ];
 
@@ -170,6 +170,11 @@ const Dashboard = () => {
                   date.setHours(e.target.value?.split(":")[0]);
                   date.setMinutes(e.target.value?.split(":")[1]);
                   setValue([new Date(date), value[1]]);
+                }}
+                onBlur={(e) => {
+                  const date = new Date(value[0]);
+                  date.setHours(e.target.value?.split(":")[0]);
+                  date.setMinutes(e.target.value?.split(":")[1]);
 
                   const config = {
                     from_date: moment(new Date(date)).format(
@@ -187,7 +192,10 @@ const Dashboard = () => {
                   <ActionIcon
                     variant="subtle"
                     color="gray"
-                    onClick={() => ref1.current?.showPicker()}
+                    onClick={() => {
+                      ref1.current?.showPicker();
+                      ref1.current?.focus();
+                    }}
                   >
                     <IconClock
                       style={{ width: rem(16), height: rem(16) }}
@@ -203,7 +211,10 @@ const Dashboard = () => {
                   <ActionIcon
                     variant="subtle"
                     color="gray"
-                    onClick={() => ref2.current?.showPicker()}
+                    onClick={() => {
+                      ref2.current?.showPicker();
+                      ref2.current?.focus();
+                    }}
                   >
                     <IconClock
                       style={{ width: rem(16), height: rem(16) }}
@@ -216,6 +227,11 @@ const Dashboard = () => {
                   date.setHours(e.target.value?.split(":")[0]);
                   date.setMinutes(e.target.value?.split(":")[1]);
                   setValue([value[0], new Date(date)]);
+                }}
+                onBlur={(e) => {
+                  const date = new Date(value[1]);
+                  date.setHours(e.target.value?.split(":")[0]);
+                  date.setMinutes(e.target.value?.split(":")[1]);
 
                   const config = {
                     from_date: moment(new Date(value[0])).format(
