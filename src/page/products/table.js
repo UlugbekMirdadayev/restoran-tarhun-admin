@@ -475,19 +475,19 @@ export default function TableComponent({
                 <Table.Th ta="center">
                   Горячие цех:{" "}
                   {formatCurrencyUZS(
-                    historiesData?.report_by_locations["Горячие цех"]
+                    historiesData?.report_by_locations?.["Горячие цех"]
                   )}
                 </Table.Th>
                 <Table.Th ta="center">
                   Холодные цех:{" "}
                   {formatCurrencyUZS(
-                    historiesData?.report_by_locations["Холодные цех"]
+                    historiesData?.report_by_locations?.["Холодные цех"]
                   )}
                 </Table.Th>
                 <Table.Th ta="center">
                   Касса:{" "}
                   {formatCurrencyUZS(
-                    historiesData?.report_by_locations["Касса"]
+                    historiesData?.report_by_locations?.["Касса"]
                   )}
                 </Table.Th>
               
@@ -496,19 +496,19 @@ export default function TableComponent({
               <Table.Th ta="center">
                   Узбекиский кухня:{" "}
                   {formatCurrencyUZS(
-                    historiesData?.report_by_locations["Узбекиский кухня"]
+                    historiesData?.report_by_locations?.["Узбекиский кухня"]
                   )}
                 </Table.Th>
                 <Table.Th ta="center">
                   Бар:{" "}
                   {formatCurrencyUZS(
-                    historiesData?.report_by_locations["Бар"]
+                    historiesData?.report_by_locations?.["Бар"]
                   )}
                 </Table.Th>
                 <Table.Th ta="center">
                   Мангал:{" "}
                   {formatCurrencyUZS(
-                    historiesData?.report_by_locations["Мангал"]
+                    historiesData?.report_by_locations?.["Мангал"]
                   )}
                 </Table.Th>
               </Table.Tr>
