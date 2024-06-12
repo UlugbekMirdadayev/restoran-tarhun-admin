@@ -98,7 +98,9 @@ function FormCreate({ handleOrders, close, editForm, setEditForm }) {
 
     if (!editedInputs?.length) return toast.info("Никаких изменений !");
     if (editForm?.id) {
-      formData.append("printer_ip", editForm.printer_ip);
+      if (!formData.get("printer_ip")) {
+        formData.append("printer_ip", editForm.printer_ip);
+      }
       formData.append("product_id", editForm.id);
       formData.append("_method", "PUT");
 
