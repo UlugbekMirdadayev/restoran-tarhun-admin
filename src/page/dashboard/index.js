@@ -14,10 +14,12 @@ import { useDispatch } from "react-redux";
 import TableComponent from "./table";
 import { useReport, useUser, useWaiter } from "../../redux/selectors";
 import { setLoader } from "../../redux/loaderSlice";
-import { postRequest } from "../../services/api";
+import { getRequest, postRequest } from "../../services/api";
 import { setReport } from "../../redux/reportSlice";
 import { Reload } from "../../components/icon";
 import { IconClock } from "@tabler/icons-react";
+import { setWaiters } from "../../redux/waiterSlice";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
   const user = useUser();
@@ -56,6 +58,29 @@ const Dashboard = () => {
     [user?.token, dispatch]
   );
 
+  const handleGetWaiters = useCallback(
+    (update) => {
+      if (!update && waiters?.length) return;
+      dispatch(setLoader(true));
+      getRequest("user/get", user?.token)
+        .then(({ data }) => {
+          dispatch(setLoader(false));
+          dispatch(
+            setWaiters(data?.result?.filter((item) => item?.role !== 1))
+          );
+        })
+        .catch((err) => {
+          dispatch(setLoader(false));
+          toast.error(err?.response?.data?.result || "Error");
+        });
+    },
+    [dispatch, waiters?.length, user?.token]
+  );
+
+  useEffect(() => {
+    handleGetWaiters();
+  }, [handleGetWaiters]);
+
   useEffect(() => {
     if (report?.length) return null;
     getReport(true, {
@@ -76,7 +101,7 @@ const Dashboard = () => {
     <div className="container-page">
       <div>
         <Flex justify={"space-between"} align={"center"}>
-          <Title>Hisobotlar </Title>
+          <Title>Отчеты </Title>
           <Button onClick={() => getReport(true)}>
             <Flex align={"center"} gap={10}>
               <Reload fill="#fff" />
@@ -86,11 +111,11 @@ const Dashboard = () => {
         </Flex>
         <Flex align={"flex-end"} gap={"lg"} my={"lg"}>
           <Select
-            label="Ishchilar bo'yicha"
+            label="Фильтр по официантам"
             data={[
               {
                 value: "all",
-                label: "Barchasi",
+                label: "Все",
                 disabled: isWaiter?.id === "all",
               },
               ...waiters?.map((item) => ({
@@ -123,13 +148,13 @@ const Dashboard = () => {
                 delete config.to_date;
               }
 
-              // getReport(true, config);
+              getReport(true, config);
             }}
           />
           <Flex direction={"column"}>
             <DatePickerInput
               required
-              label="Sanasi bo'yicha"
+              label="По дате"
               type="range"
               value={value}
               onChange={(date) => {
@@ -271,22 +296,21 @@ const Dashboard = () => {
               getReport(true, config);
             }}
           >
-            Bugunlik hisobot
+            Сегодняшний отчет
           </Button>
         </Flex>
       </div>
       <Text fw={600} fz={"lg"}>
         {isWaiter?.full_name
-          ? isWaiter?.full_name + " ishchisiga"
-          : "Barcha ishchilar bo'yicha"}
+          ? isWaiter?.full_name + " официанту"
+          : "По всем официантам"}
       </Text>
       <Text fw={600} fz={"lg"}>
         {isTodayData
-          ? "Bugungi 24 soatlik hisobot"
+          ? "Сегодняшний 24-часовой отчет"
           : value?.filter(Boolean)?.length === 2
           ? value?.map(
-              (d, i) =>
-                moment(d).format("DD-MM-YYYY") + (i ? " gacha" : " dan ")
+              (d, i) => (i ? " до " : "от ") + moment(d).format("DD-MM-YYYY")
             )
           : null}
       </Text>

@@ -21,7 +21,7 @@ import { setMeasurements } from "../../redux/measurementSlice";
 import { toast } from "react-toastify";
 
 const tabs = [
-  { link: "/", label: "Hisobotlar", icon: Dashboard },
+  { link: "/", label: "Отчеты", icon: Dashboard },
   { link: "/waiter", label: "Ofitsiant", icon: CopyBoard },
   { link: "/admins", label: "Ish boshqaruvchilar", icon: UsersIcon },
   { link: "/categories", label: "Kategoriyalar", icon: CategoryIcon },

@@ -412,7 +412,7 @@ export default function TableComponent({
                 handleProductChange(true, config);
               }}
             >
-              Bugunlik hisobot
+              Сегодняшний отчет
             </Button>
           </Flex>
           <Table

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Button, Table, Pagination, Flex, Menu } from "@mantine/core";
+import { Button, Table, Pagination, Flex, Menu, Tabs } from "@mantine/core";
 import moment from "moment";
 import { formatCurrencyUZS } from "../../utils/helpers";
 import { Eye, Reload } from "../../components/icon";
@@ -212,64 +212,127 @@ export default function TableComponent({ data, user, onUpdate }) {
     </Table.Tr>
   ));
 
+  const [activePageWaiters, setActivePageWaiters] = useState(1);
+  const itemsPerPageWaiters = 10;
+
+  const startIndexWaiters = (activePageWaiters - 1) * itemsPerPageWaiters;
+  const endIndexWaiters = startIndexWaiters + itemsPerPageWaiters;
+  const currentDataWaiters = data?.waiters?.slice(
+    startIndexWaiters,
+    endIndexWaiters
+  );
+
+  const waiterRows = currentDataWaiters?.map((waiter) => (
+    <Table.Tr key={waiter?.id}>
+      <Table.Td>{waiter?.name}</Table.Td>
+      <Table.Td>{formatCurrencyUZS(waiter?.profit)}</Table.Td>
+      <Table.Td>{waiter?.count_client}</Table.Td>
+    </Table.Tr>
+  ));
+
   return (
-    <>
-      <Table
-        my={"lg"}
-        pt={"lg"}
-        w={"100%"}
-        striped
-        highlightOnHover
-        withTableBorder
-        withColumnBorders
-      >
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Xona/Stol raqami</Table.Th>
-            <Table.Th>Ofitsiant ismi</Table.Th>
-            <Table.Th>Umumiy summa</Table.Th>
-            <Table.Th>Sanasi</Table.Th>
-            <Table.Th>Backup</Table.Th>
-            <Table.Th>Ko'rish</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {currentData?.length ? (
-            rows
-          ) : (
+    <Tabs defaultValue="orders">
+      <Tabs.List>
+        <Tabs.Tab value="orders">Заказы</Tabs.Tab>
+        <Tabs.Tab value="waiters">Официанты</Tabs.Tab>
+      </Tabs.List>
+
+      <Tabs.Panel value="orders">
+        <Table
+          my={"lg"}
+          pt={"lg"}
+          w={"100%"}
+          striped
+          highlightOnHover
+          withTableBorder
+          withColumnBorders
+        >
+          <Table.Thead>
             <Table.Tr>
-              <Table.Th ta={"center"} colSpan={5}>
-                Malumotlar mavjud emas
-              </Table.Th>
+              <Table.Th>Номер комнаты/стола</Table.Th>
+              <Table.Th>Имя официанта</Table.Th>
+              <Table.Th>Общая сумма</Table.Th>
+              <Table.Th>Дата</Table.Th>
+              <Table.Th>Backup</Table.Th>
+              <Table.Th>Чек</Table.Th>
             </Table.Tr>
-          )}
-        </Table.Tbody>
-        {data?.orders?.length ? (
-          <Table.Tfoot>
-            <Table.Tr />
+          </Table.Thead>
+          <Table.Tbody>
+            {currentData?.length ? (
+              rows
+            ) : (
+              <Table.Tr>
+                <Table.Th ta={"center"} colSpan={5}>
+                  Нет данных
+                </Table.Th>
+              </Table.Tr>
+            )}
+          </Table.Tbody>
+          {data?.orders?.length ? (
+            <Table.Tfoot>
+              <Table.Tr />
+              <Table.Tr>
+                <Table.Th colSpan={5}></Table.Th>
+              </Table.Tr>
+              <Table.Tr>
+                <Table.Th>
+                  Общая сумма: {formatCurrencyUZS(data?.total_turnover)}
+                </Table.Th>
+                <Table.Th>
+                  Общая прибыль: {formatCurrencyUZS(data?.total_profit)}
+                </Table.Th>
+                <Table.Th>Общий урон: {data?.total_damage}</Table.Th>
+                <Table.Th>Всего заказов: {data?.total_cheque}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
+          ) : null}
+        </Table>
+        <Flex justify="center" mt="lg">
+          <Pagination
+            page={activePage}
+            onChange={setActivePage}
+            total={Math.ceil(data?.orders?.length / itemsPerPage)}
+          />
+        </Flex>
+      </Tabs.Panel>
+
+      <Tabs.Panel value="waiters">
+        <Table
+          my={"lg"}
+          pt={"lg"}
+          w={"100%"}
+          striped
+          highlightOnHover
+          withTableBorder
+          withColumnBorders
+        >
+          <Table.Thead>
             <Table.Tr>
-              <Table.Th colSpan={5}></Table.Th>
+              <Table.Th>Имя</Table.Th>
+              <Table.Th>Сумма</Table.Th>
+              <Table.Th>Количество клиентов</Table.Th>
             </Table.Tr>
-            <Table.Tr>
-              <Table.Th>
-                Umumiy summa: {formatCurrencyUZS(data?.total_turnover)}
-              </Table.Th>
-              <Table.Th>
-                Umumiy foyda: {formatCurrencyUZS(data?.total_profit)}
-              </Table.Th>
-              <Table.Th>Jami zarar: {data?.total_damage}</Table.Th>
-              <Table.Th>Jami buyurtmalar: {data?.total_cheque}</Table.Th>
-            </Table.Tr>
-          </Table.Tfoot>
-        ) : null}
-      </Table>
-      <Flex justify="center" mt="lg">
-        <Pagination
-          page={activePage}
-          onChange={setActivePage}
-          total={Math.ceil(data?.orders?.length / itemsPerPage)}
-        />
-      </Flex>
-    </>
+          </Table.Thead>
+          <Table.Tbody>
+            {currentDataWaiters?.length ? (
+              waiterRows
+            ) : (
+              <Table.Tr>
+                <Table.Th ta={"center"} colSpan={3}>
+                  Нет данных
+                </Table.Th>
+              </Table.Tr>
+            )}
+          </Table.Tbody>
+        </Table>
+        <Flex justify="center" mt="lg">
+          <Pagination
+            page={activePageWaiters}
+            onChange={setActivePageWaiters}
+            total={Math.ceil(data?.waiters?.length / itemsPerPageWaiters)}
+          />
+        </Flex>
+      </Tabs.Panel>
+    </Tabs>
   );
 }
