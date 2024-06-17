@@ -464,20 +464,23 @@ export default function TableComponent({
                   Все клиенты: {historiesData?.all_client}
                 </Table.Th>
                 <Table.Th ta="center">
-                  Все общее: {formatCurrencyUZS(historiesData?.all_total)}
-                </Table.Th>
-                <Table.Th ta="center">
                   Прибыль от клиентов:
                   {formatCurrencyUZS(historiesData?.profit_from_clients)}
                 </Table.Th>
-              </Table.Tr>
-              <Table.Tr>
+                <Table.Th ta="center">
+                  Бар Касса:{" "}
+                  {formatCurrencyUZS(
+                    historiesData?.report_by_locations?.["Бар Касса"]
+                  )}
+                </Table.Th>
                 <Table.Th ta="center">
                   Горячие цех:{" "}
                   {formatCurrencyUZS(
                     historiesData?.report_by_locations?.["Горячие цех"]
                   )}
                 </Table.Th>
+              </Table.Tr>
+              <Table.Tr>
                 <Table.Th ta="center">
                   Холодные цех:{" "}
                   {formatCurrencyUZS(
@@ -489,11 +492,8 @@ export default function TableComponent({
                   {formatCurrencyUZS(
                     historiesData?.report_by_locations?.["Касса"]
                   )}
-                </Table.Th>
-              
-              </Table.Tr>
-              <Table.Tr>
-              <Table.Th ta="center">
+                </Table.Th>{" "}
+                <Table.Th ta="center">
                   Узбекиский кухня:{" "}
                   {formatCurrencyUZS(
                     historiesData?.report_by_locations?.["Узбекиский кухня"]
@@ -505,11 +505,16 @@ export default function TableComponent({
                     historiesData?.report_by_locations?.["Бар"]
                   )}
                 </Table.Th>
+              </Table.Tr>
+              <Table.Tr>
                 <Table.Th ta="center">
                   Мангал:{" "}
                   {formatCurrencyUZS(
                     historiesData?.report_by_locations?.["Мангал"]
                   )}
+                </Table.Th>
+                <Table.Th ta="center" >
+                  Все общее: {formatCurrencyUZS(historiesData?.all_total)}
                 </Table.Th>
               </Table.Tr>
             </Table.Tfoot>
